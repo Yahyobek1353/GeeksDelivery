@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menuFragment"
+        android:title="@string/menu"
+        android:icon="@drawable/menu_icon"
+        android:orderInCategory="20"
+        />
+    <item
+        android:id="@+id/profileFragment"
+        android:title="@string/profile"
+        android:icon="@drawable/profile_icon"
+        android:orderInCategory="20"
+        />
+    <item
+        android:id="@+id/basketFragment"
+        android:title="@string/basket"
+        android:icon="@drawable/basket_icon"
+        android:orderInCategory="20"
+        />
+
+
+</menu>
