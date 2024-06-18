@@ -1,33 +1,32 @@
 
 package com.saliev.geeksdelivery.presentation.ui.fragments.menu
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.viewModelScope
-import com.saliev.geeksdelivery.data.base.BaseMainResponse
-import com.saliev.geeksdelivery.data.remote.dto.CategoryDto
+import com.saliev.geeksdelivery.core.base.BaseViewModel
+import com.saliev.geeksdelivery.domain.usecase.CategoryItemUseCase
 import com.saliev.geeksdelivery.domain.usecase.CategoryUseCase
-import com.saliev.geeksdelivery.presentation.model.Resourse
-import com.saliev.geeksdelivery.presentation.model.Resourse.Loading
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.saliev.geeksdelivery.presentation.model.CategoryItemUI
+import com.saliev.geeksdelivery.presentation.model.CategoryUI
+import com.saliev.geeksdelivery.presentation.model.toUi
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class MenuFragmentViewModel(
-    private val categoryUseCase: CategoryUseCase
-) : ViewModel() {
+    private val categoryUseCase: CategoryUseCase,
+    private val categoryItemUseCase: CategoryItemUseCase
+) : BaseViewModel() {
 
-    private val _categoryState = MutableStateFlow<Resourse<BaseMainResponse<CategoryDto>?>>(Resourse.Loading())
+    private val _categoryItemState = mutableUiStateFlow<List<CategoryItemUI>>()
+    private val _categoryState = mutableUiStateFlow<List<CategoryUI>>()
     val categoryState get() = _categoryState.asStateFlow()
+    val categoryItemState get() = _categoryItemState.asStateFlow()
 
-    fun getAllCategory() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _categoryState.value = Loading()
-            categoryUseCase().collect{
-            }
+    fun categoryItem() =
+        categoryItemUseCase().gatherRequest(_categoryItemState){categoryItemModel->
+            categoryItemModel.map { it.toUi() }
         }
-    }
+
+    fun category() =
+        categoryUseCase().gatherRequest(_categoryState){ categoryModel ->
+            categoryModel.map { it.toUi() }
+        }
+
 }
