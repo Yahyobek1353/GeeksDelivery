@@ -20,7 +20,7 @@ abstract class BaseViewModel : ViewModel() {
         mappedData: (data: List<CategoryItemModel>) -> List<CategoryItemUI>
     ){
         viewModelScope.launch(Dispatchers.IO){
-//            state.value = UIState.Loading()
+            state.value = UIStateState.Loading()
             this@gatherRequest.collect{
                 when (it){
                     is Either.Left -> Error(it.value).also { }
