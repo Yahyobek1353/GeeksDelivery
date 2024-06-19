@@ -17,16 +17,19 @@ abstract class BaseViewModel : ViewModel() {
 
     protected fun <T , S> Flow<Either<String , T>>.gatherRequest(
         state: MutableStateFlow<UIState<S>>,
-        mappedData: (data: List<CategoryItemModel>) -> List<CategoryItemUI>
+        mappedData: (data: T) -> S
     ){
         viewModelScope.launch(Dispatchers.IO){
-            state.value = UIStateState.Loading()
+            state.value = UIState.Loading()
             this@gatherRequest.collect{
                 when (it){
-                    is Either.Left -> Error(it.value).also { }
+                    is Either.Left -> UIState.Error(it.value)
                     is Either.Right -> state.value = UIState.Success(mappedData(it.value))
                 }
             }
         }
     }
+
+
+
 }

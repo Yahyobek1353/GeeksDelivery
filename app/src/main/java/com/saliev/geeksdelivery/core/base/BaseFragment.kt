@@ -10,8 +10,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewbinding.ViewBinding
+import com.saliev.geeksdelivery.core.Either
 import com.saliev.geeksdelivery.core.UIState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 abstract class BaseFragment<Binding : ViewBinding , ViewModel : BaseViewModel> (
@@ -52,26 +55,42 @@ abstract class BaseFragment<Binding : ViewBinding , ViewModel : BaseViewModel> (
         idle: ((idle : UIState.Idle<T>) -> Unit )? = null,
         gatherIfSucceed : ((state : UIState<T>) -> Unit)? = null
     ){
-        saveFlowGather ( livecycleState){
+        safeFlowGather( livecycleState){
             collect{
                 gatherIfSucceed?.invoke(it)
                 when (it){
                     is UIState.Idle -> idle?.invoke(it)
                     is UIState.Loading -> loading?.invoke(it)
                     is UIState.Success -> success?.invoke(it.data)
-                    is UIState.Error ->  error?.invoke(it.toString())
+                    is UIState.Error ->  error?.invoke(it.massage.toString())
                 }
             }
         }
     }
 
-    fun saveFlowGather(
+
+
+    fun safeFlowGather(
         livecycleState : Lifecycle.State = Lifecycle.State.STARTED,
         gather : suspend () -> Unit,
     ){
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(livecycleState){
                 gather()
+            }
+        }
+    }
+
+    fun <T> Flow<Either<String , T>>.safeFlowGather(
+        actionIfEitherRight : suspend(T) -> Unit,
+        actionIfEitherLeft : (error : String) -> Unit
+    ){
+        safeFlowGather {
+            collect{
+                when(it){
+                    is Either.Right -> actionIfEitherRight(it.value)
+                    is Either.Left -> actionIfEitherLeft(it.value)
+                }
             }
         }
     }
